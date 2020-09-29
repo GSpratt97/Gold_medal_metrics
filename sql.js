@@ -98,7 +98,14 @@ won the most medals, along with the number of medals aliased to 'count'.
 */
 
 const bestDiscipline = country => {
-  return;
+  return `WITH temporary_year AS (
+            SELECT discipline, COUNT(*) AS 'count'
+            FROM GoldMedal
+            WHERE country = '${country}'
+            GROUP BY discipline
+          )
+          SELECT MAX(count) AS count, discipline
+          FROM temporary_year;`;
 };
 
 /*
@@ -107,7 +114,14 @@ won the most medals, along with the number of medals aliased to 'count'.
 */
 
 const bestSport = country => {
-  return;
+  return `WITH temporary_year AS (
+            SELECT sport, COUNT(*) AS 'count'
+            FROM GoldMedal
+            WHERE country = '${country}'
+            GROUP BY sport
+          )
+          SELECT MAX(count) AS count, sport
+          FROM temporary_year;`;
 };
 
 /*
@@ -116,7 +130,14 @@ won the most medals, along with the number of medals aliased to 'count'.
 */
 
 const bestEvent = country => {
-  return;
+  return `WITH temporary_year AS (
+            SELECT event, COUNT(*) AS 'count'
+            FROM GoldMedal
+            WHERE country = '${country}'
+            GROUP BY event
+          )
+          SELECT MAX(count) AS count, event
+          FROM temporary_year;`;
 };
 
 /*
@@ -124,7 +145,14 @@ Returns a SQL query string that will find the number of male medalists.
 */
 
 const numberMenMedalists = country => {
-  return;
+  return `WITH temporary_year AS (
+              SELECT  COUNT(*) AS 'count'
+              FROM GoldMedal
+              WHERE country = '${country}'  AND gender = 'Men'
+              GROUP BY name
+          )
+          SELECT COUNT(count) AS count 
+          FROM temporary_year;`;
 };
 
 /*
@@ -132,7 +160,14 @@ Returns a SQL query string that will find the number of female medalists.
 */
 
 const numberWomenMedalists = country => {
-  return;
+  return `WITH temporary_year AS (
+              SELECT  COUNT(*) AS 'count'
+              FROM GoldMedal
+              WHERE country = '${country}'  AND gender = 'Women'
+              GROUP BY name
+          )
+          SELECT COUNT(count) AS count 
+          FROM temporary_year;`;
 };
 
 /*
@@ -140,7 +175,12 @@ Returns a SQL query string that will find the athlete with the most medals.
 */
 
 const mostMedaledAthlete = country => {
-  return;
+  return `SELECT name, COUNT(name) AS 'count'
+          FROM GoldMedal
+          WHERE country = '${country}'
+          GROUP BY name
+          ORDER BY count DESC
+          LIMIT 1;`;
 };
 
 /*
@@ -149,7 +189,20 @@ optionally ordered by the given field in the specified direction.
 */
 
 const orderedMedals = (country, field, sortAscending) => {
-  return;
+  let direction = '';
+  if (field) {
+    if (sortAscending) {
+      direction = `ORDER BY ${field} ASC`
+    } else {
+      direction = `ORDER BY ${field} DESC`
+    }
+  }
+      
+  return `SELECT *
+          FROM GoldMedal
+          WHERE country = '${country}'
+          ${direction};`;
+  
 };
 
 /*
@@ -160,7 +213,23 @@ aliased as 'percent'. Optionally ordered by the given field in the specified dir
 */
 
 const orderedSports = (country, field, sortAscending) => {
-  return;
+  let direction = '';
+  if (field) {
+    if (sortAscending) {
+      direction = `ORDER BY ${field} ASC`
+    } else {
+      direction = `ORDER BY ${field} DESC`
+    }
+  }  
+  
+  return `SELECT sport, COUNT(sport) AS count, (COUNT(sport) * 100 / (
+            SELECT COUNT(*) 
+            FROM GoldMedal 
+            WHERE country = '${country}')) AS percent 
+          FROM GoldMedal WHERE country = '${country}' 
+          GROUP BY sport 
+          ${direction};`;
+
 };
 
 module.exports = {
